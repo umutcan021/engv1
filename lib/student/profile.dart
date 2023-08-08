@@ -3,6 +3,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:engv1/sign_in.dart';
+import 'package:engv1/utils/api.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({Key? key}) : super(key: key);
@@ -15,9 +16,7 @@ class _ProfilePage extends State<ProfilePage> {
   final _user_stream =
       FirebaseFirestore.instance.collection("users").snapshots();
 
-  var departments = ["Computer Engineering","Software Engineering",
-    "Civil Engineering", "Electrical and Electronic Engineering","Metallurgy and Material Engineering",
-    "Geological Engineering","Mining Engineering"];
+  final Api _api = Api();
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -88,7 +87,7 @@ class _ProfilePage extends State<ProfilePage> {
                   padding: EdgeInsets.all(20),
                   alignment: Alignment.centerLeft,
                   child:  Text(
-                      "Department: ${departments[currentUserDoc.first['department']]}",
+                      "Department: ${_api.getDepartmentName(currentUserDoc.first['department'])}",
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,

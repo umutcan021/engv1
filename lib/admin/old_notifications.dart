@@ -1,6 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:engv1/teacher/notification_list.dart';
+import 'package:engv1/admin/notification_list.dart';
 
 class OldNotifications extends StatefulWidget {
   const OldNotifications({super.key});

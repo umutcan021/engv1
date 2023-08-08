@@ -1,6 +1,8 @@
 import 'package:engv1/sign_in.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:engv1/utils/splash.dart';
+import 'package:animated_splash_screen/animated_splash_screen.dart';
 
 import 'sign_up.dart';
 
@@ -23,7 +25,13 @@ class _MyAppState extends State<MyApp> {
       theme: ThemeData(
         primaryColor: Colors.blue[900],
       ),
-      home: SignInPage(),
+     home: Splash(),
+     // home: AnimatedSplashScreen(
+     //   splash: Image.asset(
+     //     'assets/logo.png',
+     //     width: 200,
+     //     height: 200,
+     // ), nextScreen: SignInPage(),splashTransition: SplashTransition.fadeTransition,),
     );
   }
 }

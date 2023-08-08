@@ -1,8 +1,9 @@
-import 'dart:math';
-
+import 'dart:io';
+import 'package:engv1/utils/api.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:file_picker/file_picker.dart';
 
 class NewNotification extends StatefulWidget {
   const NewNotification({super.key});
@@ -15,7 +16,13 @@ class NewNotification extends StatefulWidget {
 class _NewNotificationState extends State<NewNotification> {
 
   // implement a code to  
+  final Api _api = Api();
+  FilePickerResult ? result;
+  String fileName = "";
+  PlatformFile? pickedFile;
+  bool isLoading = false;
 
+  File? fileToDisplay;
 
   bool showProgress = false;
 
@@ -25,63 +32,34 @@ class _NewNotificationState extends State<NewNotification> {
   final TextEditingController body_controller = TextEditingController();
   String department = "0";
   String grade = "0";
+
+  void pickFile() async{
+    try{
+
+      result = await FilePicker.platform.pickFiles(
+        type: FileType.any,
+        allowMultiple: false,
+
+      );
+      if(result!=null){
+        setState(() {
+          isLoading = true;
+        });
+        fileName = result!.files.first.name;
+        pickedFile =result!.files.first;
+        fileToDisplay = File(pickedFile!.path!.toString());
+        print('Filename : $fileName');
+      }
+    }catch(e){
+      setState(() {
+        isLoading = false;
+      });
+      print(e);
+    }
+  }
   @override
   Widget build(BuildContext context) {
-    void send_notification(String header, String body, String grade, String department,Timestamp date) async {
-      const CircularProgressIndicator();
-      // Get user id by their department and grade
-      try {
-        var intGrade = int.parse(grade);
-        var intDepartment = int.parse(department);
-        var documentId = Random().nextInt(1000000000);
-        var userIds;
-        if (intGrade == 5 && intDepartment == 7){
-          userIds = await FirebaseFirestore.instance.collection("users").where("role",isEqualTo: "student").get();
-        }
-        else if (intGrade == 5){
-          userIds = await FirebaseFirestore.instance.collection("users").where("department", isEqualTo: intDepartment).get();
-        }
-        else if (intDepartment == 7){
-          userIds = await FirebaseFirestore.instance.collection("users").where("grade", isEqualTo: intGrade).get();
-        }
 
-        else{
-         userIds = await FirebaseFirestore.instance.collection("users").where("grade", isEqualTo: intGrade).where("department", isEqualTo: intDepartment).get();
-        }
-
-        //get all user ids with the same grade and department
-
-        // add message to the message collection
-        await FirebaseFirestore.instance.collection("message").doc(documentId.toString()).set({
-          'header': header,
-          'body': body,
-          'grade': intGrade,
-          'department': intDepartment,
-          'date': date,
-        });
-
-
-        // Write message to the user id found
-       for (var userId in userIds.docs) {
-         await FirebaseFirestore.instance.collection("users").doc(userId.id).update({
-           'received_messages': FieldValue.arrayUnion([{
-             'header': header,
-             'body': body,
-             'grade': intGrade,
-             'department': intDepartment,
-             'date': date,
-             'docId' :documentId.toString(),
-              'isStarred': false,
-           }])});
-        }
-      } catch (e) {
-        print(e);
-      }
-
-
-
-
-    }
     return Scaffold(
 
       body: SingleChildScrollView(
@@ -288,24 +266,36 @@ class _NewNotificationState extends State<NewNotification> {
 
                         Row(
 
-                          mainAxisAlignment: MainAxisAlignment.end,
+                          mainAxisAlignment: MainAxisAlignment.start,
                           children: [
-                           /* Padding(
-                                padding: EdgeInsets.only(left: 5),
-                                child: Checkbox(value: select_all,
-                                    onChanged:(value) {
-                                      setState(() {
-                                        select_all = value!;
-                                      });
-                                    }),
-                            ),
+                            Container(
+                              width: MediaQuery.sizeOf(context).width*0.50,
+                              margin: EdgeInsets.only(right: 20),
+                              child: MaterialButton(
+                                elevation: 5.0,
+                                shape: const RoundedRectangleBorder(
+                                    borderRadius:
+                                    BorderRadius.all(Radius.circular(5.0))),
+                                onPressed: () {
+                                  pickFile();
+                                  print(isLoading);
+                                },
+                                color: Colors.white,
 
-                            Text("Select All"),*/
+                                child: isLoading?
+                                Text(
+                                    style: const TextStyle(
+                                      color: Colors.black,
+                                      fontSize: 15.0,
+                                    ),
+                                    fileName!.length < 19 ? fileName! : "${fileName!.substring(0,15)}..." ): Icon(Icons.attach_file),
+                              ),
+                            ),
                             SizedBox(
-                              width: 140,
+                              width: 40,
                             ),
                             Padding(
-                              padding: EdgeInsets.only(right: 20),
+                              padding: const EdgeInsets.only(left: 0),
                               child:   MaterialButton(
                                 shape: RoundedRectangleBorder(
                                     borderRadius:
@@ -318,7 +308,7 @@ class _NewNotificationState extends State<NewNotification> {
                                     setState(() {
                                       showProgress = true;
                                     });
-                                    send_notification(notificaiton_header_controller.text,
+                                   _api.send_notification(fileName,fileToDisplay, notificaiton_header_controller.text,
                                         body_controller.text,grade.toString(),department.toString(),Timestamp.now());
                                   }
                                   else {

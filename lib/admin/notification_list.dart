@@ -1,8 +1,9 @@
-import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:intl/intl.dart';
+
+import 'package:engv1/utils/api.dart';
 
 class NotificationList extends StatefulWidget {
   const NotificationList({Key? key}) : super(key: key);
@@ -15,15 +16,11 @@ class _NotificationList extends State<NotificationList> {
   final _notification_stream =
       FirebaseFirestore.instance.collection("message").snapshots();
   bool starred = false;
+
+
   @override
   Widget build(BuildContext context) {
-    String convertDateTimeDisplay(String date) {
-      final DateFormat displayFormater = DateFormat('yyyy-MM-dd HH:mm:ss.SSS');
-      final DateFormat serverFormater = DateFormat('dd-MM-yyyy');
-      final DateTime displayDate = displayFormater.parse(date);
-      final String formatted = serverFormater.format(displayDate);
-      return formatted;
-    }
+    final Api _api = Api();
 
     return Scaffold(
         body: StreamBuilder(
@@ -50,66 +47,42 @@ class _NotificationList extends State<NotificationList> {
 
               return ListTile(
                   title: Text(docs[index]['header']),
-                  subtitle: Text(convertDateTimeDisplay(
+                  subtitle: Text(_api.convertDateTimeDisplay(
                       '${DateUtils.dateOnly(docs[index]["date"].toDate())}')),
                   trailing: Row(mainAxisSize: MainAxisSize.min, children:
                   [
                     IconButton(onPressed: () async {
                       DocumentSnapshot? ds = snapshot.data!.docs[index];
-
-                      FirebaseFirestore.instance.collection("message").doc(ds.id).delete();
-
-                      int intDepartment = ds['department'];
-
-
-
-                      int intGrade = ds['grade'];
-
-                      var docId = ds.id;
-                      var userIds;
-                      // print(docId);
-                      //print the type of docId
-                      print(docId.runtimeType);
-                      if(intGrade == 5 && intDepartment == 7){
-                        userIds = await FirebaseFirestore.instance.collection("users").where("role" ,isEqualTo: "student").get();
-                      }
-                      else if(intGrade == 5){
-                        userIds = await FirebaseFirestore.instance.collection("users").where("department",isEqualTo: intDepartment).get();
-                      }
-                      else if(intDepartment == 7){
-                        userIds = await FirebaseFirestore.instance.collection("users").where("grade",isEqualTo: intGrade).get();
-                      }
-                      else{
-                        userIds = await FirebaseFirestore.instance.collection("users").where("grade", isEqualTo: intGrade).where("department", isEqualTo: intDepartment).get();
-                      }
-                      //var userIds = await FirebaseFirestore.instance.collection("users").where("grade", isEqualTo: intGrade).where("department", isEqualTo: intDepartment).get();
-                      //delete element from users array of map that same with docId
-                      //print(userIds.docs.length);
-
-                      for(var userId in userIds.docs){
-
-                        var dc = await FirebaseFirestore.instance.collection('users').doc(userId.id).get();
-                        var message = dc['received_messages'] as List;
-
-
-
-                        message.removeWhere((element) => element['docId'] == docId.toString());
-
-                        await FirebaseFirestore.instance.collection('users').doc(userId.id).update({
-                          'received_messages': message
-                        });
-                        }
+                      _api.delete(ds);
                       },
                         icon: Icon(Icons.delete_forever)),
                   ]),
                   onTap: () {
                     //Open a pop up to show the message
+                    print("object");
                     showDialog(
                         context: context,
                         builder: (BuildContext context) {
                           return AlertDialog(
                             title: Text(docs[index]['header']),
-                            content: Text(docs[index]['body']),
+                            content: Container(
+                              height: MediaQuery.sizeOf(context).height*0.4,
+                              child: Column(
+                                children: [
+                                  Text(docs[index]['body']),
+                                  Text(_api.convertDateTimeDisplay(
+                                      '${DateUtils.dateOnly(docs[index]["date"].toDate())}')),
+                                 docs[index]['image_url'] != null?TextButton(onPressed: (){
+                                   String link = docs[index]['image_url'];
+                                   String filename= docs[index]['file_name'];
+                                    _api.downloadFile(link,filename);
+                                    print("launched");
+
+
+                                 }, child: Text("Download material")):SizedBox(height: 0,),
+                                ],
+                              ),
+                            ),
                             actions: [
                               TextButton(
                                   onPressed: () {

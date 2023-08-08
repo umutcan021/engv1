@@ -1,4 +1,4 @@
-import 'package:firebase_core/firebase_core.dart';
+import 'package:engv1/utils/api.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -15,15 +15,10 @@ class _NotificationList extends State<NotificationList> {
   final _notification_stream =
       FirebaseFirestore.instance.collection("message").snapshots();
   bool starred = false;
+  Api _api = new Api();
   @override
   Widget build(BuildContext context) {
-    String convertDateTimeDisplay(String date) {
-      final DateFormat displayFormater = DateFormat('yyyy-MM-dd HH:mm:ss.SSS');
-      final DateFormat serverFormater = DateFormat('dd-MM-yyyy');
-      final DateTime displayDate = displayFormater.parse(date);
-      final String formatted = serverFormater.format(displayDate);
-      return formatted;
-    }
+
 
     return Scaffold(
         body: StreamBuilder(
@@ -50,42 +45,14 @@ class _NotificationList extends State<NotificationList> {
 
               return ListTile(
                   title: Text(docs[index]['header']),
-                  subtitle: Text(convertDateTimeDisplay(
+                  subtitle: Text(_api.convertDateTimeDisplay(
                       '${DateUtils.dateOnly(docs[index]["date"].toDate())}')),
                   trailing: Row(mainAxisSize: MainAxisSize.min, children:
                   [
                     IconButton(onPressed: () async {
                       DocumentSnapshot? ds = snapshot.data!.docs[index];
 
-                      FirebaseFirestore.instance.collection("message").doc(ds.id).delete();
-
-                      int intDepartment = ds['department'];
-
-
-
-                      int intGrade = ds['grade'];
-
-                      var docId = ds.id;
-                      print(docId);
-                      //print the type of docId
-                      print(docId.runtimeType);
-                      var userIds = await FirebaseFirestore.instance.collection("users").where("grade", isEqualTo: intGrade).where("department", isEqualTo: intDepartment).get();
-                      //delete element from users array of map that same with docId
-                      print(userIds.docs.length);
-
-                      for(var userId in userIds.docs){
-
-                        var dc = await FirebaseFirestore.instance.collection('users').doc(userId.id).get();
-                        var message = dc['received_messages'] as List;
-
-
-
-                        message.removeWhere((element) => element['docId'] == docId.toString());
-
-                        await FirebaseFirestore.instance.collection('users').doc(userId.id).update({
-                          'received_messages': message
-                        });
-                        }
+                      _api.delete(ds!);
                       },
                         icon: Icon(Icons.delete_forever)),
                   ]),

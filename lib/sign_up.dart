@@ -46,23 +46,23 @@ class _SignUpState extends State<SignUp> {
               height: MediaQuery.of(context).size.height,
               child: SingleChildScrollView(
                 child: Container(
-                  margin: EdgeInsets.all(12),
+                  margin: const EdgeInsets.all(12),
                   child: Form(
                     key: _formkey,
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
-                        SizedBox(
+                        const SizedBox(
                           height: 50,
                         ),
                         //add back button to sign in page
                         Row(
                           children: [
                            Padding(
-                             padding: EdgeInsets.only(left: 5),
+                             padding: const EdgeInsets.only(left: 5),
                              child: IconButton(
-                               icon: Icon(Icons.arrow_back,size: 40,),
+                               icon: const Icon(Icons.arrow_back,size: 40,),
 
                                onPressed: () {
                                  Navigator.push(
@@ -79,16 +79,16 @@ class _SignUpState extends State<SignUp> {
                         ClipRRect(
                           borderRadius: BorderRadius.circular(24.0),
                           child: const Image(
-                            image: AssetImage('assets/logo.png'),
+                            image: AssetImage('assets/logononame.png'),
                             height: 150,
                             width: 150,
                           ),
                         ),
 
-                        SizedBox(
+                        const SizedBox(
                           height: 10,
                         ),
-                        SizedBox(
+                        const SizedBox(
                           height: 50,
                         ),
                         TextFormField(
@@ -123,7 +123,7 @@ class _SignUpState extends State<SignUp> {
                           onChanged: (value) {},
                           keyboardType: TextInputType.emailAddress,
                         ),
-                        SizedBox(
+                        const SizedBox(
                           height: 20,
                         ),
 
@@ -168,7 +168,7 @@ class _SignUpState extends State<SignUp> {
                           },
                           onChanged: (value) {},
                         ),
-                        SizedBox(
+                        const SizedBox(
                           height: 20,
                         ),
                         TextFormField(
@@ -209,7 +209,7 @@ class _SignUpState extends State<SignUp> {
                           },
                           onChanged: (value) {},
                         ),
-                        SizedBox(
+                        const SizedBox(
                           height: 50,
                         ),
                         Row(
@@ -235,9 +235,9 @@ class _SignUpState extends State<SignUp> {
                                          borderRadius: new BorderRadius.circular(10),
                                        ),
                                      ),
-                         hint: Text("Department"),
+                         hint: const Text("Department"),
                          items:
-                         [DropdownMenuItem(value: "0",child: Text("Computer E."),),
+                         const [DropdownMenuItem(value: "0",child: Text("Computer E."),),
                            DropdownMenuItem(value: "1",child: Text("Software E."),),
                            DropdownMenuItem(value: "2",child: Text("Civil E."),),
                            DropdownMenuItem(value: "3",child: Text("Electrical and Electronics E."),),
@@ -249,7 +249,7 @@ class _SignUpState extends State<SignUp> {
                          department = value.toString();
                        });}),),
 
-                            SizedBox(
+                            const SizedBox(
                               width: 5,
                             ),
                          Expanded(
@@ -263,16 +263,16 @@ class _SignUpState extends State<SignUp> {
                                   contentPadding: const EdgeInsets.only(
                                       left: 8.0, bottom: 8.0, top: 15.0),
                                   focusedBorder: UnderlineInputBorder(
-                                    borderSide: new BorderSide(color: Colors.black),
-                                    borderRadius: new BorderRadius.circular(5),
+                                    borderSide: const BorderSide(color: Colors.black),
+                                    borderRadius: BorderRadius.circular(5),
                                   ),
                                   enabledBorder: OutlineInputBorder(
                                     borderSide: new BorderSide(color: Colors.black),
                                     borderRadius: new BorderRadius.circular(5),
                                   ),
                                 ),
-                                hint: Text("Grade"),
-                                items: [
+                                hint: const Text("Grade"),
+                                items: const [
                                  DropdownMenuItem(value: "0",child: Text("Prep School"),
                                ),
                                DropdownMenuItem(value: "1",child: Text("1st Grade"),
@@ -282,6 +282,8 @@ class _SignUpState extends State<SignUp> {
                                DropdownMenuItem(value: "3",child: Text("3rd Grade"),
                                ),
                                DropdownMenuItem(value: "4",child: Text("4th Grade"),
+                               ),
+                                  DropdownMenuItem(value: "6",child: Text("Graduated"),
                                ),
 
                              ], onChanged: (value){
@@ -293,7 +295,7 @@ class _SignUpState extends State<SignUp> {
                         ),
 
 
-                        SizedBox(
+                        const SizedBox(
                           height: 40,
                         ),
 
@@ -302,9 +304,9 @@ class _SignUpState extends State<SignUp> {
                           mainAxisAlignment: MainAxisAlignment.end,
                           children: [
                           Padding(
-                            padding: EdgeInsets.only(right: 30),
+                            padding: const EdgeInsets.only(right: 30),
                             child:   MaterialButton(
-                              shape: RoundedRectangleBorder(
+                              shape: const RoundedRectangleBorder(
                                   borderRadius:
                                   BorderRadius.all(Radius.circular(5.0))),
                               elevation: 5.0,
@@ -319,7 +321,7 @@ class _SignUpState extends State<SignUp> {
                                 signUp(emailController.text,
                                     passwordController.text, role,department,grade);
                               },
-                              child: Text(
+                              child: const Text(
                                 "Sign Up",
                                 style: TextStyle(
                                   fontSize: 20,
@@ -345,7 +347,7 @@ class _SignUpState extends State<SignUp> {
 
   void signUp(String email, String password, String role,String department,String grade) async {
     const CircularProgressIndicator();
-    print("email: $email");
+
     if (_formkey.currentState!.validate()) {
       await _auth
           .createUserWithEmailAndPassword(email: email, password: password)
@@ -359,7 +361,12 @@ class _SignUpState extends State<SignUp> {
     var user = _auth.currentUser;
     
     CollectionReference ref = FirebaseFirestore.instance.collection('users');
-    ref.doc(user!.uid).set({'email': emailController.text, 'role': role,'department':int.parse(department),'grade':int.parse(grade),'received_messages':[]});
+    if(role =='student'){
+      ref.doc(user!.uid).set({'email': emailController.text, 'role': role,'department':int.parse(department),'grade':int.parse(grade),'received_messages':[]});
+    }
+    else{
+      ref.doc(user!.uid).set({'email': emailController.text, 'role': role});
+    }
     Navigator.pushReplacement(
         context, MaterialPageRoute(builder: (context) => SignInPage()));
   }

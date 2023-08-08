@@ -1,9 +1,9 @@
-import 'dart:math';
-
+import 'dart:io';
+import 'package:engv1/utils/api.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-
+import 'package:file_picker/file_picker.dart';
 class NewNotification extends StatefulWidget {
   const NewNotification({super.key});
   @override
@@ -14,6 +14,15 @@ class NewNotification extends StatefulWidget {
 
 class _NewNotificationState extends State<NewNotification> {
 
+  FilePickerResult ? result;
+  String fileName = "";
+  PlatformFile? pickedFile;
+  bool isLoading = false;
+
+  File? fileToDisplay;
+  final Api _api = Api();
+
+
   bool showProgress = false;
 
   bool select_all = false;
@@ -22,63 +31,34 @@ class _NewNotificationState extends State<NewNotification> {
   final TextEditingController body_controller = TextEditingController();
   String department = "0";
   String grade = "0";
+  void pickFile() async{
+    try{
+
+      result = await FilePicker.platform.pickFiles(
+        type: FileType.any,
+        allowMultiple: true,
+
+      );
+      if(result!=null){
+        setState(() {
+          isLoading = true;
+        });
+        fileName = result!.files.first.name;
+        pickedFile =result!.files.first;
+        fileToDisplay = File(pickedFile!.path!.toString());
+        print('Filename : $fileName');
+      }
+    }catch(e){
+      setState(() {
+        isLoading = false;
+      });
+      print(e);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    void send_notification(String header, String body, String grade, String department,Timestamp date) async {
-      const CircularProgressIndicator();
-      // Get user id by their department and grade
-      try {
-        var intGrade = int.parse(grade);
-        var intDepartment = int.parse(department);
-        var documentId = Random().nextInt(1000000000);
-        var userIds;
-        if (intGrade == 5 && intDepartment == 7){
-          userIds = await FirebaseFirestore.instance.collection("users").where("role",isEqualTo: "student").get();
-        }
-        else if (intGrade == 5){
-          userIds = await FirebaseFirestore.instance.collection("users").where("department", isEqualTo: intDepartment).get();
-        }
-        else if (intDepartment == 7){
-          userIds = await FirebaseFirestore.instance.collection("users").where("grade", isEqualTo: intGrade).get();
-        }
 
-        else{
-         userIds = await FirebaseFirestore.instance.collection("users").where("grade", isEqualTo: intGrade).where("department", isEqualTo: intDepartment).get();
-        }
-
-        //get all user ids with the same grade and department
-
-        // add message to the message collection
-        await FirebaseFirestore.instance.collection("message").doc(documentId.toString()).set({
-          'header': header,
-          'body': body,
-          'grade': intGrade,
-          'department': intDepartment,
-          'date': date,
-        });
-
-
-        // Write message to the user id found
-       for (var userId in userIds.docs) {
-         await FirebaseFirestore.instance.collection("users").doc(userId.id).update({
-           'received_messages': FieldValue.arrayUnion([{
-             'header': header,
-             'body': body,
-             'grade': intGrade,
-             'department': intDepartment,
-             'date': date,
-             'docId' :documentId.toString(),
-              'isStarred': false,
-           }])});
-        }
-      } catch (e) {
-        print(e);
-      }
-
-
-
-
-    }
     return Scaffold(
 
       body: SingleChildScrollView(
@@ -117,6 +97,21 @@ class _NewNotificationState extends State<NewNotification> {
                        ),
                         SizedBox(
                           height: 20,
+                        ),
+                        Container(
+                          alignment: Alignment.centerLeft,
+                          child:  const Text("Teacher Page",
+                            style: TextStyle(
+                              fontSize: 20,
+                              color: Colors.black,
+
+                            ),
+
+                          ),
+
+                        ),
+                        SizedBox(
+                          height: 10,
                         ),
                         //Header
                         TextFormField(
@@ -187,93 +182,83 @@ class _NewNotificationState extends State<NewNotification> {
                           height: 20,
                         ),
 
+                        //Create an image picker
 
-                        const SizedBox(
-                          height: 20,
-                        ),
 
                         Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
+
+                              Container(
+                                width: MediaQuery.sizeOf(context).width*0.4
+                                ,
+                                child: DropdownButtonFormField(
+                                    decoration: InputDecoration(
+                                      filled: true,
+                                      fillColor: Colors.white,
+                                      enabled: true,
+
+
+                                      contentPadding: const EdgeInsets.only(
+                                          left: 8.0, bottom: 8.0, top: 15.0),
+                                      focusedBorder: UnderlineInputBorder(
+                                        borderSide: new BorderSide(color: Colors.black),
+                                        borderRadius: new BorderRadius.circular(5),
+                                      ),
+                                      enabledBorder: OutlineInputBorder(
+                                        borderSide: new BorderSide(color: Colors.black),
+                                        borderRadius: new BorderRadius.circular(5),
+                                      ),
+                                    ),
+                                    hint: Text("Grade"),
+                                    items: const [
+                                      DropdownMenuItem(value: "5",child: Text("Select All"),
+                                      ),
+                                      DropdownMenuItem(value: "0",child: Text("Prep School"),
+                                      ),
+                                      DropdownMenuItem(value: "1",child: Text("1st Grade"),
+                                      ),
+                                      DropdownMenuItem(value: "2",child: Text("2nd Grade"),
+                                      ),
+                                      DropdownMenuItem(value: "3",child: Text("3rd Grade"),
+                                      ),
+                                      DropdownMenuItem(value: "4",child: Text("4th Grade"),
+                                      ),
+
+
+                                    ], onChanged: (value){
+                                  setState(() {
+                                    grade = value.toString();
+                                  });
+                                }),
+                              ),
+
+
+                            //Select image button
                             Container(
-                              height: 50,
-                              width: MediaQuery.of(context).size.width*0.6,
-                              child: DropdownButtonFormField(
-                                  decoration: InputDecoration(
+                              width: MediaQuery.sizeOf(context).width*0.45,
+                              margin: EdgeInsets.only(left: 20),
+                              child: MaterialButton(
+                                elevation: 5.0,
+                                shape: const RoundedRectangleBorder(
+                                    borderRadius:
+                                    BorderRadius.all(Radius.circular(5.0))),
+                                onPressed: () {
+                                 pickFile();
+                                 print(isLoading);
+                                },
+                                color: Colors.white,
 
-                                    filled: true,
-                                    fillColor: Colors.white,
-                                    enabled: true,
-                                    contentPadding: const EdgeInsets.only(
-                                        left: 8.0, bottom: 8.0, top: 8.0),
-                                    focusedBorder: UnderlineInputBorder(
-                                      borderSide: new BorderSide(color: Colors.black),
-                                      borderRadius: new BorderRadius.circular(10),
+                                child: isLoading?
+                                Text(
+                                    style: const TextStyle(
+                                      color: Colors.black,
+                                      fontSize: 15.0,
                                     ),
-                                    enabledBorder: OutlineInputBorder(
-                                      borderSide: new BorderSide(color: Colors.black),
-                                      borderRadius: new BorderRadius.circular(10),
-                                    ),
-                                  ),
-                                  hint: Text("Department"),
-                                  items:
-                                  const [
-                                    DropdownMenuItem(value: "7",child: Text("Select All"),),
-                                    DropdownMenuItem(value: "0",child: Text("Computer E."),),
-                                    DropdownMenuItem(value: "1",child: Text("Software E."),),
-                                    DropdownMenuItem(value: "2",child: Text("Civil E."),),
-                                    DropdownMenuItem(value: "3",child: Text("Electrical and Electronics E."),),
-                                    DropdownMenuItem(value: "4",child: Text("Metallurgy and Materials E."),),
-                                    DropdownMenuItem(value: "5",child: Text("Geological E."),),
-                                    DropdownMenuItem(value: "6",child: Text("Mining E."),),
-                                  ], onChanged:  (value){
-                                setState(() {
-                                  department = value.toString();
-                                });}),),
+                                    fileName!.length < 19 ? fileName! : "${fileName!.substring(0,15)}..." ): Icon(Icons.attach_file),
+                              ),
+                            )
 
-                            const SizedBox(
-                              width: 8,
-                            ),
-                            Expanded(
-                              child:
-                              DropdownButtonFormField(
-                                  decoration: InputDecoration(
-                                    filled: true,
-                                    fillColor: Colors.white,
-                                    enabled: true,
-
-
-                                    contentPadding: const EdgeInsets.only(
-                                        left: 8.0, bottom: 8.0, top: 15.0),
-                                    focusedBorder: UnderlineInputBorder(
-                                      borderSide: new BorderSide(color: Colors.black),
-                                      borderRadius: new BorderRadius.circular(5),
-                                    ),
-                                    enabledBorder: OutlineInputBorder(
-                                      borderSide: new BorderSide(color: Colors.black),
-                                      borderRadius: new BorderRadius.circular(5),
-                                    ),
-                                  ),
-                                  hint: Text("Grade"),
-                                  items: const [
-                                    DropdownMenuItem(value: "5",child: Text("Select All"),
-                                    ),
-                                    DropdownMenuItem(value: "0",child: Text("Prep School"),
-                                    ),
-                                    DropdownMenuItem(value: "1",child: Text("1st Grade"),
-                                    ),
-                                    DropdownMenuItem(value: "2",child: Text("2nd Grade"),
-                                    ),
-                                    DropdownMenuItem(value: "3",child: Text("3rd Grade"),
-                                    ),
-                                    DropdownMenuItem(value: "4",child: Text("4th Grade"),
-                                    ),
-
-                                  ], onChanged: (value){
-                                setState(() {
-                                  grade = value.toString();
-                                });
-                              }),)
                           ],
                         ),
 
@@ -315,7 +300,7 @@ class _NewNotificationState extends State<NewNotification> {
                                     setState(() {
                                       showProgress = true;
                                     });
-                                    send_notification(notificaiton_header_controller.text,
+                                    _api.send_notification(fileName,fileToDisplay,notificaiton_header_controller.text,
                                         body_controller.text,grade.toString(),department.toString(),Timestamp.now());
                                   }
                                   else {
@@ -333,6 +318,7 @@ class _NewNotificationState extends State<NewNotification> {
                                   select_all = false;
                                   setState(() {
                                     showProgress = true;
+                                    isLoading = false;
                                   });
 
 
@@ -360,6 +346,8 @@ class _NewNotificationState extends State<NewNotification> {
       ),
     );
   }
+
+
 
 
 }

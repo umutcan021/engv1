@@ -49,14 +49,5 @@ class _TeacherState extends State<Teacher> {
     );
   }
 
-  Future<void> logout(BuildContext context) async {
-    CircularProgressIndicator();
-    await FirebaseAuth.instance.signOut();
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(
-        builder: (context) => SignInPage(),
-      ),
-    );
-  }
+
 }

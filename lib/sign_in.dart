@@ -3,12 +3,15 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'student.dart';
 import 'teacher.dart';
+import 'admin.dart';
 import 'sign_up.dart';
 
 
 
 
 class SignInPage extends StatefulWidget {
+  const SignInPage({super.key});
+
   @override
   _SignInPage createState() => _SignInPage();
 }
@@ -46,7 +49,7 @@ class _SignInPage extends State<SignInPage> {
                         ClipRRect(
                           borderRadius: BorderRadius.circular(24.0),
                           child: const Image(
-                            image: AssetImage('assets/logo.png'),
+                            image: AssetImage('assets/logononame.png'),
                             height: 150,
                             width: 150,
                           ),
@@ -96,6 +99,7 @@ class _SignInPage extends State<SignInPage> {
 
                           controller: passwordController,
                           obscureText: _isObscure3,
+
                           decoration: InputDecoration(
                             suffixIcon: IconButton(
                                 icon: Icon(_isObscure3
@@ -262,18 +266,25 @@ class _SignInPage extends State<SignInPage> {
             .then((DocumentSnapshot documentSnapshot) {
       if (documentSnapshot.exists) {
         print(documentSnapshot.get('role'));
-        if (documentSnapshot.get('role') == "teacher") {
+        if (documentSnapshot.get('role') == "admin") {
            Navigator.pushReplacement(
           context,
           MaterialPageRoute(
-            builder: (context) =>  Teacher(),
+            builder: (context) =>  const Admin(),
+          ),
+        );
+        }else if (documentSnapshot.get('role') == "student"){
+          Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) =>  const Student(),
           ),
         );
         }else{
           Navigator.pushReplacement(
           context,
           MaterialPageRoute(
-            builder: (context) =>  Student(),
+            builder: (context) =>  const Teacher(),
           ),
         );
         }
@@ -294,6 +305,8 @@ class _SignInPage extends State<SignInPage> {
         route();
       } on FirebaseAuthException catch (e) {
         if (e.code == 'user-not-found') {
+
+
           print('No user found for that email.');
         } else if (e.code == 'wrong-password') {
           print('Wrong password provided for that user.');
