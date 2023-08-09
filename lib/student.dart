@@ -42,17 +42,15 @@ class _StudentState extends State<Student> {
     BottomNavigationBarItem(
     icon: Icon(Icons.school),
     label: 'Faculty',
-    backgroundColor: Colors.red,
+
     ),
     BottomNavigationBarItem(
     icon: Icon(Icons.notifications_active),
     label: 'Notifications',
-    backgroundColor: Colors.green,
     ),
     BottomNavigationBarItem(
     icon: Icon(Icons.person),
     label: 'Profile',
-    backgroundColor: Colors.purple,
     ),
     ],
       currentIndex: selectedIndex,

@@ -1,11 +1,13 @@
 import 'dart:io';
 import 'package:engv1/utils/api.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
 class NewNotification extends StatefulWidget {
-  const NewNotification({super.key});
+  final String dep;
+  const NewNotification( {super.key, required this.dep});
   @override
   _NewNotificationState createState() => _NewNotificationState();
 }
@@ -14,8 +16,11 @@ class NewNotification extends StatefulWidget {
 
 class _NewNotificationState extends State<NewNotification> {
 
+  var userId =  FirebaseAuth.instance.currentUser!.uid;
+
+
   FilePickerResult ? result;
-  String fileName = "";
+  String ? fileName;
   PlatformFile? pickedFile;
   bool isLoading = false;
 
@@ -59,7 +64,12 @@ class _NewNotificationState extends State<NewNotification> {
   @override
   Widget build(BuildContext context) {
 
+
+
+
+
     return Scaffold(
+
 
       body: SingleChildScrollView(
         child: Column(
@@ -82,36 +92,38 @@ class _NewNotificationState extends State<NewNotification> {
                           height: 60,
                         ),
 
-                       Container(
-                         alignment: Alignment.centerLeft,
-                         child:  const Text("Create Notification",
-                           style: TextStyle(
-                             fontSize: 30,
-                             fontWeight: FontWeight.bold,
-                             color: Colors.black,
-
-                           ),
+                       const Text(
+                         "CREATE NOTIFICATION",
+                         textAlign: TextAlign.center,
+                         style: TextStyle(
+                           fontSize: 30,
+                           fontWeight: FontWeight.bold,
+                           color: Colors.black,
 
                          ),
 
                        ),
                         SizedBox(
-                          height: 20,
+                          height: MediaQuery.sizeOf(context).height*0.02,
                         ),
-                        Container(
-                          alignment: Alignment.centerLeft,
-                          child:  const Text("Teacher Page",
-                            style: TextStyle(
-                              fontSize: 20,
-                              color: Colors.black,
+                        Row(
+                          children: [
+
+                            Text("${_api.getDepartmentName(int.parse(widget.dep))} Teacher Page",
+                              style: const TextStyle(
+                                fontSize: 20,
+                                color: Colors.black,
+
+                              ),
 
                             ),
 
-                          ),
 
+                          ],
                         ),
+
                         SizedBox(
-                          height: 10,
+                          height: MediaQuery.sizeOf(context).height*0.07,
                         ),
                         //Header
                         TextFormField(
@@ -272,17 +284,6 @@ class _NewNotificationState extends State<NewNotification> {
 
                           mainAxisAlignment: MainAxisAlignment.end,
                           children: [
-                           /* Padding(
-                                padding: EdgeInsets.only(left: 5),
-                                child: Checkbox(value: select_all,
-                                    onChanged:(value) {
-                                      setState(() {
-                                        select_all = value!;
-                                      });
-                                    }),
-                            ),
-
-                            Text("Select All"),*/
                             SizedBox(
                               width: 140,
                             ),
@@ -300,8 +301,9 @@ class _NewNotificationState extends State<NewNotification> {
                                     setState(() {
                                       showProgress = true;
                                     });
-                                    _api.send_notification(fileName,fileToDisplay,notificaiton_header_controller.text,
+                                    _api.send_notification("teacher",int.parse(widget.dep),fileName,fileToDisplay,notificaiton_header_controller.text,
                                         body_controller.text,grade.toString(),department.toString(),Timestamp.now());
+
                                   }
                                   else {
                                     setState(() {

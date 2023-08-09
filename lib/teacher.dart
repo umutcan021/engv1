@@ -6,7 +6,8 @@ import 'package:engv1/teacher/old_notifications.dart';
 import 'sign_in.dart';
 
 class Teacher extends StatefulWidget {
-  const Teacher({super.key});
+  final String dep;
+  const Teacher({Key? key, required this.dep}) : super(key: key);
 
   @override
   State<Teacher> createState() => _TeacherState();
@@ -16,8 +17,8 @@ class _TeacherState extends State<Teacher> {
   int selectedIndex = 0;
   @override
   Widget build(BuildContext context) {
-    const List<Widget> widgetOptions = <Widget>[
-      NewNotification(),
+     List<Widget> widgetOptions = <Widget>[
+      NewNotification(dep: widget.dep),
       OldNotifications(),
     ];
     void _onItemTapped(int index) {

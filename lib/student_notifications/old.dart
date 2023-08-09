@@ -1,14 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:engv1/student/notification_list.dart';
-
-class StarredNotificationsPage extends StatefulWidget {
-  const StarredNotificationsPage({super.key});
+class DeletedNotificationsPage extends StatefulWidget {
+  const DeletedNotificationsPage({super.key});
 
   @override
-  State<StarredNotificationsPage> createState() => _StarredNotificationsPage();
+  State<DeletedNotificationsPage> createState() => _DeletedNotificationsPage();
 }
 
-class _StarredNotificationsPage extends State<StarredNotificationsPage> {
+class _DeletedNotificationsPage extends State<DeletedNotificationsPage> {
   @override
   Widget build(BuildContext context) {
     return  Scaffold(
@@ -33,7 +32,7 @@ class _StarredNotificationsPage extends State<StarredNotificationsPage> {
                         width: MediaQuery.of(context).size.width,
 
                         child: const Center(
-                          child:NotificationList(source: 1,filter1: 'isStarred',value1: true,filter2: 'isStarred',value2: true,),
+                          child:NotificationList(source: 2,filter1: 'isStarred',value1: false,filter2: 'isRead',value2: true,),
                         ),
                       ),
                     ],

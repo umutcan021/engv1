@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:engv1/sign_in.dart';
+
 import 'package:engv1/utils/api.dart';
 
 class ProfilePage extends StatefulWidget {
@@ -17,6 +17,7 @@ class _ProfilePage extends State<ProfilePage> {
       FirebaseFirestore.instance.collection("users").snapshots();
 
   final Api _api = Api();
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -35,139 +36,146 @@ class _ProfilePage extends State<ProfilePage> {
           var currentUserId = FirebaseAuth.instance.currentUser!.uid;
           print(currentUserId);
           //getUsername by currentUserID
-          var currentUserDoc = snapshot.data!.docs.where((element) => element.id == currentUserId);
+          var currentUserDoc = snapshot.data!.docs
+              .where((element) => element.id == currentUserId);
           //return Text('${currentUserDoc}');
           return Center(
             child: Column(
               children: [
-                SizedBox(
+                const SizedBox(
                   height: 100,
                 ),
-                Text("Profile Page",
+
+                const Text("Profile",
                     style: TextStyle(
-                      fontSize: 30,
+                      fontSize: 40,
                       fontWeight: FontWeight.bold,
                     )),
                 SizedBox(
-                  height: 50,
+                  height: MediaQuery.sizeOf(context).height * 0.07,
+                ),
+                Divider(
+                  color: Colors.black,
+                  thickness: 0.7,
+                  indent: MediaQuery.sizeOf(context).width * 0.1,
+                  endIndent: MediaQuery.sizeOf(context).width * 0.1,
+                ),
+                SizedBox(
+                  height: MediaQuery.sizeOf(context).height * 0.03,
                 ),
                 //Reach data by username
 
-               Container(
-                 padding: EdgeInsets.all(20),
-                 alignment: Alignment.centerLeft,
-                 child:  Text(
-                     "Username: ${currentUserDoc.first['email'].toString().split('@')[0]}",
-                     style: TextStyle(
-                       fontSize: 16,
-                       fontWeight: FontWeight.bold,
-
-                     )
-                 ),
-               ),
-                SizedBox(
-                  height: 20,
-                ),
                 Container(
-                  padding: EdgeInsets.all(20),
-                  alignment: Alignment.centerLeft,
-                  child:  Text(
-                      "Email: ${currentUserDoc.first['email']}",
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-
-                      )
+                  padding:
+                      EdgeInsets.all(MediaQuery.sizeOf(context).width * 0.04),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text(
+                        'Username:',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      Text(
+                        currentUserDoc.first['email'].toString().split('@')[0],
+                      ),
+                    ],
                   ),
                 ),
                 SizedBox(
-                  height: 20,
+                  height: MediaQuery.sizeOf(context).height * 0.02,
                 ),
                 Container(
-                  padding: EdgeInsets.all(20),
-                  alignment: Alignment.centerLeft,
-                  child:  Text(
-                      "Department: ${_api.getDepartmentName(currentUserDoc.first['department'])}",
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-
-                      )
+                  padding:
+                      EdgeInsets.all(MediaQuery.sizeOf(context).width * 0.04),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text(
+                        'Email:',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      Text(currentUserDoc.first['email']),
+                    ],
                   ),
                 ),
                 SizedBox(
-                  height: 20,
+                  height: MediaQuery.sizeOf(context).height * 0.03,
                 ),
                 Container(
-                  padding: EdgeInsets.all(20),
-                  alignment: Alignment.centerLeft,
-                  child: Text(
-                      "Grade: ${currentUserDoc.first['grade'] == 0? "Freshman":currentUserDoc.first['grade'] == 1?
-                  "Sophomore":currentUserDoc.first['grade'] == 2? "Junior":"Senior"}" ,
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-
-                      )
-                   ),
+                  padding:
+                      EdgeInsets.all(MediaQuery.sizeOf(context).width * 0.04),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text("Department:",
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          )),
+                      Text(
+                        "${_api.getDepartmentName(currentUserDoc.first['department'])}",
+                      ),
+                    ],
+                  ),
                 ),
                 SizedBox(
-                  height: 50,
+                  height: MediaQuery.sizeOf(context).height * 0.03,
+                ),
+                Container(
+                  padding: EdgeInsets.all(MediaQuery.sizeOf(context).width * 0.04),
+                  alignment: Alignment.centerLeft,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text("Grade:",
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          )),
+                      Text(
+                          currentUserDoc.first['grade'] == 0 ? "Freshman" : currentUserDoc.first['grade'] == 1 ? "Sophomore" : currentUserDoc.first['grade'] == 2 ? "Junior" : "Senior",
+                          ),
+                    ],
+                  ),
+                ),
+                SizedBox(
+                  height: MediaQuery.sizeOf(context).height * 0.07,
                 ),
                 //Update button that opens an pop up
-                ElevatedButton(
-                  onPressed: () {
-                    showDialog(
-                        context: context,
-                        builder: (BuildContext context) {
-                          return AlertDialog(
-                            title: Text("Update Profile"),
-                            content: const Column(
-                              children: [
-                                TextField(
-                                  decoration: InputDecoration(
-                                      hintText: "Enter new username"),
-                                ),
-                                TextField(
-                                  decoration: InputDecoration(
-                                      hintText: "Enter new email"),
-                                ),
-                                TextField(
-                                  decoration: InputDecoration(
-                                      hintText: "Enter new department"),
-                                ),
-                                TextField(
-                                  decoration: InputDecoration(
-                                      hintText: "Enter new grade"),
-                                ),
-                              ],
-                            ),
-                            actions: [
-                              ElevatedButton(
-                                  onPressed: () {
-                                    Navigator.pop(context);
-                                  },
-                                  child: Text("Cancel")),
-                              ElevatedButton(
-                                  onPressed: () {
-                                    Navigator.pop(context);
-                                  },
-                                  child: Text("Update")),
 
-                            ],
-                          );
-                        });
-                  },
-                  child: Text("Update Profile"),
-                ),
                 //Logout button
-                ElevatedButton(
-                  onPressed: () {
-                    FirebaseAuth.instance.signOut();
-                    //go to sign in page
-                    logout(context);},
-                  child: Text("Logout")
-                ),
+                Container(
+                  margin: const EdgeInsets.only(right: 20,left: 20),
+                  alignment: Alignment.centerRight,
+                  child: ElevatedButton(
+
+                      onPressed: () {
+                        FirebaseAuth.instance.signOut();
+                        //go to sign in page
+                        _api.logout(context);
+                      },
+                      child:  Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+
+                          const Icon(
+                              Icons.logout,
+                            color: Colors.white,
+                          ),
+                          SizedBox(
+                            width: MediaQuery.sizeOf(context).width * 0.03,
+                          ),
+                          const Text("Logout"),
+
+                        ],
+                      )),
+                )
               ],
             ),
           );
@@ -175,14 +183,5 @@ class _ProfilePage extends State<ProfilePage> {
       ),
     );
   }
-  Future<void> logout(BuildContext context) async {
-    const CircularProgressIndicator();
-    await FirebaseAuth.instance.signOut();
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(
-        builder: (context) => SignInPage(),
-      ),
-    );
-  }
+
 }

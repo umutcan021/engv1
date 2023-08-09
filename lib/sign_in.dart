@@ -5,9 +5,7 @@ import 'student.dart';
 import 'teacher.dart';
 import 'admin.dart';
 import 'sign_up.dart';
-
-
-
+import 'package:fluttertoast/fluttertoast.dart';
 
 class SignInPage extends StatefulWidget {
   const SignInPage({super.key});
@@ -24,6 +22,7 @@ class _SignInPage extends State<SignInPage> {
   final TextEditingController passwordController = new TextEditingController();
 
   final _auth = FirebaseAuth.instance;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -42,7 +41,7 @@ class _SignInPage extends State<SignInPage> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
-                       //Add your logo here
+                        //Add your logo here
                         SizedBox(
                           height: 30,
                         ),
@@ -80,7 +79,8 @@ class _SignInPage extends State<SignInPage> {
                             if (value!.length == 0) {
                               return "Email cannot be empty";
                             }
-                            if (!RegExp("[A-Za-z0-9._%+-]+@(posta\.mu\.edu\.tr|mu\.edu\.tr)")
+                            if (!RegExp(
+                                    "[A-Za-z0-9._%+-]+@(posta\.mu\.edu\.tr|mu\.edu\.tr)")
                                 .hasMatch(value)) {
                               return ("Please enter a valid email");
                             } else {
@@ -96,10 +96,8 @@ class _SignInPage extends State<SignInPage> {
                           height: 20,
                         ),
                         TextFormField(
-
                           controller: passwordController,
                           obscureText: _isObscure3,
-
                           decoration: InputDecoration(
                             suffixIcon: IconButton(
                                 icon: Icon(_isObscure3
@@ -141,53 +139,50 @@ class _SignInPage extends State<SignInPage> {
                           },
                           keyboardType: TextInputType.emailAddress,
                         ),
-                       
 
                         Row(
                           mainAxisAlignment: MainAxisAlignment.start,
                           children: [
                             TextButton(
-                                onPressed: (){
+                                onPressed: () {
                                   print("Forgot Password");
                                 },
                                 child: Text(
-                                   "Forgot Password?",
+                                  "Forgot Password?",
                                   style: TextStyle(
-                                      color: Colors.black,
-                                      fontSize: 15),
-
+                                      color: Colors.black, fontSize: 15),
                                 )),
-
                           ],
                         ),
                         Row(
-                          mainAxisAlignment: MainAxisAlignment.end,
-                          children: [
-
-                           Padding(padding: EdgeInsets.only(right: 20,top: 10),
-                               child: MaterialButton(
-                                 shape: RoundedRectangleBorder(
-                                     borderRadius:
-                                     BorderRadius.all(Radius.circular(10.0))),
-                                 elevation: 5.0,
-                                 height: 40,
-                                 onPressed: () {
-                                   setState(() {
-                                     visible = true;
-                                   });
-                                   signIn(
-                                       emailController.text, passwordController.text);
-                                 },
-                                 child: Text(
-                                   "Login",
-                                   style: TextStyle(
-                                     fontSize: 20,
-                                   ),
-                                 ),
-                                 color: Colors.white,
-                               ),)
-                          ]
-                        ),
+                            mainAxisAlignment: MainAxisAlignment.end,
+                            children: [
+                              Padding(
+                                padding: EdgeInsets.only(right: 20, top: 10),
+                                child: MaterialButton(
+                                  shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.all(
+                                          Radius.circular(10.0))),
+                                  elevation: 5.0,
+                                  height: 40,
+                                  onPressed: () {
+                                    setState(() {
+                                      visible = true;
+                                    });
+                                    signIn(emailController.text,
+                                        passwordController.text);
+                                  },
+                                  child: Text(
+                                    "Login",
+                                    style: TextStyle(
+                                      fontSize: 20,
+                                    ),
+                                  ),
+                                  color: Colors.white,
+                                ),
+                              )
+                              //give a toast message
+                            ]),
 
                         Visibility(
                             maintainSize: true,
@@ -198,13 +193,11 @@ class _SignInPage extends State<SignInPage> {
                                 child: CircularProgressIndicator(
                               color: Colors.white,
                             ))),
-
                       ],
                     ),
                   ),
                 ),
-                ),
-
+              ),
             ),
             Container(
               color: Colors.white,
@@ -223,30 +216,37 @@ class _SignInPage extends State<SignInPage> {
                     ),
                     Row(
                       children: [
-
-                        Padding(padding: EdgeInsets.only(left: 30),child: Text(
-                          "Don't have an account? ",
-                          style: TextStyle(
-                            fontSize: 15,
+                        Padding(
+                          padding: EdgeInsets.only(left: 30),
+                          child: Text(
+                            "Don't have an account? ",
+                            style: TextStyle(
+                              fontSize: 15,
+                            ),
                           ),
-                        ),),
-                        Padding(padding:
-                        EdgeInsets.only(),
-                        child: TextButton( child: Text('Create one.',style: TextStyle(
-                            fontSize: 15,
-                            color: Colors.blue,
-                          ),),
-                          onPressed: () {   Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(
-          builder: (context) => SignUp(),
-        ),
-      ); },),)
-
+                        ),
+                        Padding(
+                          padding: EdgeInsets.only(),
+                          child: TextButton(
+                            child: Text(
+                              'Create one.',
+                              style: TextStyle(
+                                fontSize: 15,
+                                color: Colors.blue,
+                              ),
+                            ),
+                            onPressed: () {
+                              Navigator.pushReplacement(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => SignUp(),
+                                ),
+                              );
+                            },
+                          ),
+                        )
                       ],
                     ),
-
-
                   ],
                 ),
               ),
@@ -260,33 +260,32 @@ class _SignInPage extends State<SignInPage> {
   void route() {
     User? user = FirebaseAuth.instance.currentUser;
     var kk = FirebaseFirestore.instance
-            .collection('users')
-            .doc(user!.uid)
-            .get()
-            .then((DocumentSnapshot documentSnapshot) {
+        .collection('users')
+        .doc(user!.uid)
+        .get()
+        .then((DocumentSnapshot documentSnapshot) {
       if (documentSnapshot.exists) {
         print(documentSnapshot.get('role'));
         if (documentSnapshot.get('role') == "admin") {
-           Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-            builder: (context) =>  const Admin(),
-          ),
-        );
-        }else if (documentSnapshot.get('role') == "student"){
           Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-            builder: (context) =>  const Student(),
-          ),
-        );
-        }else{
+            context,
+            MaterialPageRoute(
+              builder: (context) => const Admin(),
+            ),
+          );
+        } else if (documentSnapshot.get('role') == "student") {
           Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-            builder: (context) =>  const Teacher(),
-          ),
-        );
+            context,
+            MaterialPageRoute(
+              builder: (context) => const Student(),
+            ),
+          );
+        } else {
+          String department = documentSnapshot.get('department');
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => Teacher(dep: department)),
+          );
         }
       } else {
         print('Document does not exist on the database');
@@ -303,9 +302,14 @@ class _SignInPage extends State<SignInPage> {
           password: password,
         );
         route();
+        //create toast message
+        Fluttertoast.showToast(
+            msg: 'Login Successfull', toastLength: Toast.LENGTH_LONG);
       } on FirebaseAuthException catch (e) {
         if (e.code == 'user-not-found') {
-
+          Fluttertoast.showToast(
+              msg: 'No user found for that email.',
+              toastLength: Toast.LENGTH_LONG);
 
           print('No user found for that email.');
         } else if (e.code == 'wrong-password') {
@@ -315,6 +319,3 @@ class _SignInPage extends State<SignInPage> {
     }
   }
 }
-
-
-

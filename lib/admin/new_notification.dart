@@ -1,9 +1,9 @@
 import 'dart:io';
 import 'package:engv1/utils/api.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 
 class NewNotification extends StatefulWidget {
   const NewNotification({super.key});
@@ -26,10 +26,10 @@ class _NewNotificationState extends State<NewNotification> {
 
   bool showProgress = false;
 
-  bool select_all = false;
+  bool selectAll = false;
   final _formkey = GlobalKey<FormState>();
-  final TextEditingController notificaiton_header_controller = TextEditingController();
-  final TextEditingController body_controller = TextEditingController();
+  final TextEditingController headerController = TextEditingController();
+  final TextEditingController bodyController = TextEditingController();
   String department = "0";
   String grade = "0";
 
@@ -48,13 +48,13 @@ class _NewNotificationState extends State<NewNotification> {
         fileName = result!.files.first.name;
         pickedFile =result!.files.first;
         fileToDisplay = File(pickedFile!.path!.toString());
-        print('Filename : $fileName');
+
       }
     }catch(e){
       setState(() {
         isLoading = false;
       });
-      print(e);
+      Fluttertoast.showToast(msg: "The file couldn't upload");
     }
   }
   @override
@@ -66,29 +66,29 @@ class _NewNotificationState extends State<NewNotification> {
         child: Column(
           children: <Widget>[
 
-            Container(
+            SizedBox(
 
               width: MediaQuery.of(context).size.width,
               height: MediaQuery.of(context).size.height,
               child: SingleChildScrollView(
                 child: Container(
-                  margin: EdgeInsets.all(12),
+                  margin: EdgeInsets.all(MediaQuery.sizeOf(context).height*0.016),
                   child: Form(
                     key: _formkey,
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
-                        const SizedBox(
-                          height: 60,
+                         SizedBox(
+                          height: MediaQuery.sizeOf(context).height*0.1,
                         ),
 
                        Container(
-                         alignment: Alignment.centerLeft,
+                         alignment: Alignment.center,
                          child:  const Text("Create Notification",
                            style: TextStyle(
-                             fontSize: 30,
-                             fontWeight: FontWeight.bold,
+                             fontSize: 40,
+                             fontWeight: FontWeight.w300,
                              color: Colors.black,
 
                            ),
@@ -97,25 +97,24 @@ class _NewNotificationState extends State<NewNotification> {
 
                        ),
                         SizedBox(
-                          height: 20,
+                          height: MediaQuery.sizeOf(context).height*0.04,
                         ),
                         //Header
                         TextFormField(
-                          controller: notificaiton_header_controller,
+                          controller: headerController,
                           decoration: InputDecoration(
                             filled: true,
                             fillColor: Colors.white,
                             hintText: 'Header of Notification',
                             enabled: true,
-                            contentPadding: const EdgeInsets.only(
-                                left: 14.0, bottom: 8.0, top: 8.0),
+
                             focusedBorder: UnderlineInputBorder(
-                              borderSide: new BorderSide(color: Colors.black),
-                              borderRadius: new BorderRadius.circular(10),
+                              borderSide: const BorderSide(color: Colors.black),
+                              borderRadius: BorderRadius.circular(10),
                             ),
                             enabledBorder: OutlineInputBorder(
-                              borderSide: new BorderSide(color: Colors.black),
-                              borderRadius: new BorderRadius.circular(10),
+                              borderSide: const BorderSide(color: Colors.black),
+                              borderRadius: BorderRadius.circular(10),
                             ),
                           ),
                           validator: (value) {
@@ -134,25 +133,23 @@ class _NewNotificationState extends State<NewNotification> {
                         ),
                         //Body
                         TextFormField(
-                          controller: body_controller,
+                          controller: bodyController,
                           decoration: InputDecoration(
                             filled: true,
                             fillColor: Colors.white,
                             hintText: 'Body of Notification',
                             enabled: true,
-                            contentPadding: const EdgeInsets.only(
-                                left: 14.0, bottom: 8.0, top: 8.0),
                             focusedBorder: UnderlineInputBorder(
-                              borderSide: new BorderSide(color: Colors.black),
-                              borderRadius: new BorderRadius.circular(10),
+                              borderSide: const BorderSide(color: Colors.black),
+                              borderRadius:  BorderRadius.circular(10),
                             ),
                             enabledBorder: OutlineInputBorder(
-                              borderSide: new BorderSide(color: Colors.black),
-                              borderRadius: new BorderRadius.circular(10),
+                              borderSide: const BorderSide(color: Colors.black),
+                              borderRadius:  BorderRadius.circular(10),
                             ),
                           ),
-                          minLines: 10,
-                          maxLines: 13,
+                          minLines: MediaQuery.sizeOf(context).height.toInt() ~/ 70,
+                          maxLines: MediaQuery.sizeOf(context).height.toInt() ~/ 65,
                           validator: (value) {
                             if (value!.isEmpty) {
                               return "Body cannot be empty";
@@ -176,8 +173,8 @@ class _NewNotificationState extends State<NewNotification> {
                         Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Container(
-                              height: 50,
+                            SizedBox(
+                              height: MediaQuery.sizeOf(context).height*0.06,
                               width: MediaQuery.of(context).size.width*0.6,
                               child: DropdownButtonFormField(
                                   decoration: InputDecoration(
@@ -188,15 +185,15 @@ class _NewNotificationState extends State<NewNotification> {
                                     contentPadding: const EdgeInsets.only(
                                         left: 8.0, bottom: 8.0, top: 8.0),
                                     focusedBorder: UnderlineInputBorder(
-                                      borderSide: new BorderSide(color: Colors.black),
-                                      borderRadius: new BorderRadius.circular(10),
+                                      borderSide: const BorderSide(color: Colors.black),
+                                      borderRadius:  BorderRadius.circular(10),
                                     ),
                                     enabledBorder: OutlineInputBorder(
-                                      borderSide: new BorderSide(color: Colors.black),
-                                      borderRadius: new BorderRadius.circular(10),
+                                      borderSide: const BorderSide(color: Colors.black),
+                                      borderRadius:  BorderRadius.circular(10),
                                     ),
                                   ),
-                                  hint: Text("Department"),
+                                  hint: const Text("Department"),
                                   items:
                                   const [
                                     DropdownMenuItem(value: "7",child: Text("Select All"),),
@@ -212,8 +209,8 @@ class _NewNotificationState extends State<NewNotification> {
                                   department = value.toString();
                                 });}),),
 
-                            const SizedBox(
-                              width: 8,
+                            SizedBox(
+                              width: MediaQuery.sizeOf(context).width*0.02,
                             ),
                             Expanded(
                               child:
@@ -227,15 +224,15 @@ class _NewNotificationState extends State<NewNotification> {
                                     contentPadding: const EdgeInsets.only(
                                         left: 8.0, bottom: 8.0, top: 15.0),
                                     focusedBorder: UnderlineInputBorder(
-                                      borderSide: new BorderSide(color: Colors.black),
-                                      borderRadius: new BorderRadius.circular(5),
+                                      borderSide: const BorderSide(color: Colors.black),
+                                      borderRadius:  BorderRadius.circular(5),
                                     ),
                                     enabledBorder: OutlineInputBorder(
-                                      borderSide: new BorderSide(color: Colors.black),
-                                      borderRadius: new BorderRadius.circular(5),
+                                      borderSide: const BorderSide(color: Colors.black),
+                                      borderRadius:  BorderRadius.circular(5),
                                     ),
                                   ),
-                                  hint: Text("Grade"),
+                                  hint: const Text("Grade"),
                                   items: const [
                                     DropdownMenuItem(value: "5",child: Text("Select All"),
                                     ),
@@ -259,57 +256,54 @@ class _NewNotificationState extends State<NewNotification> {
                         ),
 
                         SizedBox(
-                          height: 40,
+                          height: MediaQuery.sizeOf(context).height*0.07,
                         ),
 
 
 
                         Row(
 
-                          mainAxisAlignment: MainAxisAlignment.start,
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            Container(
-                              width: MediaQuery.sizeOf(context).width*0.50,
-                              margin: EdgeInsets.only(right: 20),
-                              child: MaterialButton(
-                                elevation: 5.0,
-                                shape: const RoundedRectangleBorder(
-                                    borderRadius:
-                                    BorderRadius.all(Radius.circular(5.0))),
-                                onPressed: () {
-                                  pickFile();
-                                  print(isLoading);
-                                },
-                                color: Colors.white,
+                            MaterialButton(
+                              elevation: 5.0,
+                              height : MediaQuery.sizeOf(context).height*0.06,
+                              minWidth: MediaQuery.sizeOf(context).width*0.6,
 
-                                child: isLoading?
-                                Text(
-                                    style: const TextStyle(
-                                      color: Colors.black,
-                                      fontSize: 15.0,
-                                    ),
-                                    fileName!.length < 19 ? fileName! : "${fileName!.substring(0,15)}..." ): Icon(Icons.attach_file),
-                              ),
+                              shape: const RoundedRectangleBorder(
+                                  borderRadius:
+                                  BorderRadius.all(Radius.circular(5.0))),
+                              onPressed: () {
+                                pickFile();
+                              },
+                              color: Colors.white,
+
+                              child: isLoading?
+                              Text(
+                                  style: const TextStyle(
+                                    color: Colors.black,
+                                    fontSize: 15.0,
+                                  ),
+                                  fileName.length < 19 ? fileName : "${fileName.substring(0,15)}..." ): const Icon(Icons.attach_file),
                             ),
-                            SizedBox(
-                              width: 40,
-                            ),
+
                             Padding(
                               padding: const EdgeInsets.only(left: 0),
                               child:   MaterialButton(
-                                shape: RoundedRectangleBorder(
+                                shape: const RoundedRectangleBorder(
                                     borderRadius:
                                     BorderRadius.all(Radius.circular(5.0))),
                                 elevation: 5.0,
-                                height: 40,
+                                height: MediaQuery.sizeOf(context).height*0.06,
+                                minWidth: MediaQuery.sizeOf(context).width*0.3,
                                 onPressed: () {
 
                                   if (_formkey.currentState!.validate()) {
                                     setState(() {
                                       showProgress = true;
                                     });
-                                   _api.send_notification(fileName,fileToDisplay, notificaiton_header_controller.text,
-                                        body_controller.text,grade.toString(),department.toString(),Timestamp.now());
+                                   _api.send_notification("admin",-1,fileName,fileToDisplay, headerController.text,
+                                        bodyController.text,grade.toString(),department.toString(),Timestamp.now());
                                   }
                                   else {
                                     setState(() {
@@ -318,25 +312,26 @@ class _NewNotificationState extends State<NewNotification> {
                                   }
 
                                   _formkey.currentState?.reset();
-                                  notificaiton_header_controller.clear();
-                                  body_controller.clear();
+                                  headerController.clear();
+                                  bodyController.clear();
                                   //reset dropdown
                                   department = "0";
                                   grade = "0";
-                                  select_all = false;
+                                  selectAll = false;
                                   setState(() {
                                     showProgress = true;
+                                     isLoading = false;
                                   });
 
 
                                 },
-                                child: Text(
+                                color: Colors.white,
+                                child: const Text(
                                   "Send",
                                   style: TextStyle(
                                     fontSize: 20,
                                   ),
                                 ),
-                                color: Colors.white,
                               ),
                             ),
                           ],
