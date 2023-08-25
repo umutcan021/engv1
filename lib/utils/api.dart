@@ -11,6 +11,7 @@ import 'package:flutter/foundation.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
 import '../sign_in.dart';
+
 class Api {
   final _departments = [
     "Computer Engineering",
@@ -55,7 +56,6 @@ class Api {
     var docId = ds.id;
     var userIds;
 
-
     if (intGrade == 5 && intDepartment == 7) {
       userIds = await FirebaseFirestore.instance
           .collection("users")
@@ -98,7 +98,7 @@ class Api {
   void send_notification(
       String document,
       int depint,
-      String ? fileName,
+      String? fileName,
       File? fileToDisplay,
       String header,
       String body,
@@ -139,59 +139,55 @@ class Api {
       }
       print("user ids: " + userIds.docs.toString());
 
-      if(fileName!= null) {
-        String filName2Upload = "${fileName!.split(
-            ".")[0]}-$documentId.${fileName!.split(".")[1]}";
+      if (fileName != null) {
+        print("file name: " + fileName!);
+        String filName2Upload =
+            "${fileName!.split(".")[0]}-$documentId.${fileName!.split(".")[1]}";
 
-
-        //get all user ids with the same grade and department
-        Reference imageRef = FirebaseStorage.instance.ref().child(
-            filName2Upload);
+        Reference imageRef =
+            FirebaseStorage.instance.ref().child(filName2Upload);
         await imageRef.putFile(fileToDisplay!);
 
         String imageUrl = await imageRef.getDownloadURL();
 
         fileToDisplay = null;
 
-
-      await FirebaseFirestore.instance
-          .collection(document)
-          .doc(documentId.toString())
-          .set({
-        'header': header,
-        'body': body,
-        'grade': intGrade,
-        'department': intDepartment,
-        'date': date,
-        'image_url': imageUrl,
-        'file_name': fileName,
-
-      });
-
-      // Write message to the user id found
-      for (var userId in userIds.docs) {
         await FirebaseFirestore.instance
-            .collection("users")
-            .doc(userId.id)
-            .update({
-          'received_messages': FieldValue.arrayUnion([
-            {
-              'header': header,
-              'body': body,
-              'grade': intGrade,
-              'department': intDepartment,
-              'date': date,
-              'docId': documentId.toString(),
-              'isStarred': false,
-              'image_url': imageUrl,
-              'file_name': fileName,
-              'isRead': false,
-            }
-          ])
+            .collection(document)
+            .doc(documentId.toString())
+            .set({
+          'header': header,
+          'body': body,
+          'grade': intGrade,
+          'department': intDepartment,
+          'date': date,
+          'image_url': imageUrl,
+          'file_name': fileName,
         });
-      }
-      }
-      else{
+
+        // Write message to the user id found
+        for (var userId in userIds.docs) {
+          await FirebaseFirestore.instance
+              .collection("users")
+              .doc(userId.id)
+              .update({
+            'received_messages': FieldValue.arrayUnion([
+              {
+                'header': header,
+                'body': body,
+                'grade': intGrade,
+                'department': intDepartment,
+                'date': date,
+                'docId': documentId.toString(),
+                'isStarred': false,
+                'image_url': imageUrl,
+                'file_name': fileName,
+                'isRead': false,
+              }
+            ])
+          });
+        }
+      } else {
         await FirebaseFirestore.instance
             .collection(document)
             .doc(documentId.toString())
@@ -203,7 +199,6 @@ class Api {
           'date': date,
           'image_url': null,
           'file_name': null,
-
         });
 
         // Write message to the user id found
@@ -224,15 +219,14 @@ class Api {
                 'image_url': null,
                 'file_name': null,
                 'isRead': false
-
               }
             ])
           });
         }
       }
-
+      Fluttertoast.showToast(msg: "The notification was sent successfully");
     } catch (e) {
-      Fluttertoast.showToast(msg: "The message was not sent");
+      Fluttertoast.showToast(msg: "The notification was not sent");
       print("The error is ----> $e");
     }
   }
@@ -240,95 +234,84 @@ class Api {
 //create a function that returns dialog widget
   Widget notification(BuildContext context, int index, List docs) {
     return Container(
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(20),
-      ),
-      child:  AlertDialog(
-
-        scrollable: true,
-        title: Text(
-            docs[index]['header'],
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              fontWeight: FontWeight.bold,
-              fontSize: 20,
-            )
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(20),
         ),
+        child: AlertDialog(
+          scrollable: true,
+          title: Text(docs[index]['header'],
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 20,
+              )),
+          content: SingleChildScrollView(
+            scrollDirection: Axis.vertical,
+            child: Column(
+              children: [
+                SizedBox(
+                  height: MediaQuery.sizeOf(context).height * 0.02,
+                ),
+                Text(docs[index]['body'],
+                    textAlign: TextAlign.justify,
+                    style: const TextStyle(
+                      fontSize: 18,
+                    )),
+                //horizontal rule
+                SizedBox(
+                  height: MediaQuery.sizeOf(context).height * 0.02,
+                ),
+                const Divider(
+                  color: Colors.black,
+                  thickness: 0.4,
+                ),
+                SizedBox(
+                  height: MediaQuery.sizeOf(context).height * 0.05,
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Text(
+                      "Post Date: ",
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                      ),
+                    ),
+                    Text(convertDateTimeDisplay(
+                        '${DateUtils.dateOnly(docs[index]["date"].toDate())}')),
+                  ],
+                ),
 
-        content: SingleChildScrollView(
-          scrollDirection: Axis.vertical,
-          child: Column(
-            children: [
-              SizedBox(
-                height: MediaQuery.sizeOf(context).height*0.02,
-              ),
-              Text(
-
-                  docs[index]['body'],
-                  textAlign: TextAlign.justify,
-                  style: const TextStyle(
-                    fontSize: 18,
-                  )
-              ),
-              //horizontal rule
-              SizedBox(
-                height: MediaQuery.sizeOf(context).height*0.02,
-              ),
-              const Divider(
-                color: Colors.black,
-                thickness: 0.4,
-              ),
-              SizedBox(
-                height: MediaQuery.sizeOf(context).height*0.05,
-              ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  const Text("Post Date: ",
-
-                    style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 16,
-                  ),
-                  ),
-                  Text( convertDateTimeDisplay(
-                      '${DateUtils.dateOnly(docs[index]["date"].toDate())}')),
-                ],
-              ),
-
-              SizedBox(
-                height: MediaQuery.sizeOf(context).height*0.05,
-              ),
-              docs[index]['image_url'] != null
-                  ? TextButton(
-                  onPressed: () {
-                    String link = docs[index]['image_url'];
-                    String filename = docs[index]['file_name'];
-                    downloadFile(link, filename);
-                  },
-                  child: const Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text("Download material")
-                    ],
-                  ))
-                  : const SizedBox(
-                height: 0,
-              ),
-            ],
+                SizedBox(
+                  height: MediaQuery.sizeOf(context).height * 0.05,
+                ),
+                docs[index]['image_url'] != null
+                    ? TextButton(
+                        onPressed: () {
+                          String link = docs[index]['image_url'];
+                          String filename = docs[index]['file_name'];
+                          downloadFile(link, filename);
+                        },
+                        child: const Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [Text("Download material")],
+                        ))
+                    : const SizedBox(
+                        height: 0,
+                      ),
+              ],
+            ),
           ),
-        ),
-        actions: [
-          TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: Text("Close"))
-        ],
-      )
-    );
+          actions: [
+            TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+                child: Text("Close"))
+          ],
+        ));
   }
-
 
   Future<void> logout(BuildContext context) async {
     const CircularProgressIndicator();
