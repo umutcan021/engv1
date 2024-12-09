@@ -1,42 +1,77 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:engv1/student_notifications/starred.dart';
-import 'package:engv1/student_notifications/old.dart';
-import 'package:engv1/student_notifications/new.dart';
-import 'package:engv1/student/notification_list.dart';
-import 'package:firebase_core/firebase_core.dart';
 
-class NotificaitonsPage extends StatefulWidget  {
-  const NotificaitonsPage({Key? key}) : super(key: key);
+class NotificationsPage extends StatefulWidget {
+  const NotificationsPage({Key? key}) : super(key: key);
 
   @override
-  _NotificaitonsPageState createState() => _NotificaitonsPageState();
+  _NotificationsPageState createState() => _NotificationsPageState();
 }
 
-class _NotificaitonsPageState extends State<NotificaitonsPage> with TickerProviderStateMixin {
-  
-  List<String> notifications = ['Notification 1', 'Notification 2', 'Notification 3'];
-  List<bool> isStarred = [false, false, false];
+class _NotificationsPageState extends State<NotificationsPage>
+    with TickerProviderStateMixin {
+  TabController? _tabController;
 
-  
-  void toggleStar(int index) {
+
+  List<String> newNotifications = [];
+  List<String> starredNotifications = [];
+  List<String> oldNotifications = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _tabController = TabController(length: 3, vsync: this);
+  }
+
+  @override
+  void dispose() {
+    _tabController?.dispose();
+    super.dispose();
+  }
+
+  void _addNotification(String text) {
     setState(() {
-      isStarred[index] = !isStarred[index];
+      newNotifications.add(text);
     });
   }
 
-  
-  void deleteNotification(int index) {
-    setState(() {
-      notifications.removeAt(index);
-      isStarred.removeAt(index);
-    });
+  void _showAddNotificationDialog() {
+    TextEditingController _controller = TextEditingController();
+
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text("Add Notification"),
+          content: TextField(
+            controller: _controller,
+            decoration:
+                const InputDecoration(hintText: "Enter notification text"),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: const Text("Cancel"),
+            ),
+            TextButton(
+              onPressed: () {
+                if (_controller.text.isNotEmpty) {
+                  _addNotification(_controller.text);
+                  Navigator.of(context).pop();
+                }
+              },
+              child: const Text("Add"),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    TabController _tabController = TabController(length: 3, vsync: this);
-
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.white,
@@ -44,7 +79,7 @@ class _NotificaitonsPageState extends State<NotificaitonsPage> with TickerProvid
           controller: _tabController,
           labelColor: Colors.black,
           unselectedLabelColor: Colors.grey,
-          tabs: [
+          tabs: const [
             Tab(text: "New"),
             Tab(text: "Starred"),
             Tab(text: "Old"),
@@ -54,85 +89,54 @@ class _NotificaitonsPageState extends State<NotificaitonsPage> with TickerProvid
       body: TabBarView(
         controller: _tabController,
         children: [
-          
-          ListView.builder(
-            itemCount: notifications.length,
-            itemBuilder: (context, index) {
-              return NotificationItem(
-                notificationText: notifications[index],
-                isStarred: isStarred[index],
-                onDelete: () => deleteNotification(index),
-                onToggleStar: () => toggleStar(index),
-              );
-            },
-          ),
-          
-          ListView.builder(
-            itemCount: notifications.length,
-            itemBuilder: (context, index) {
-              if (isStarred[index]) {
-                return NotificationItem(
-                  notificationText: notifications[index],
-                  isStarred: isStarred[index],
-                  onDelete: () => deleteNotification(index),
-                  onToggleStar: () => toggleStar(index),
-                );
-              }
-              return Container(); 
-            },
-          ),
-          
-          ListView.builder(
-            itemCount: notifications.length,
-            itemBuilder: (context, index) {
-              return NotificationItem(
-                notificationText: notifications[index],
-                isStarred: isStarred[index],
-                onDelete: () => deleteNotification(index),
-                onToggleStar: () => toggleStar(index),
-              );
-            },
-          ),
+          _buildNotificationList(newNotifications, "No new notifications"),
+          _buildNotificationList(
+              starredNotifications, "No starred notifications"),
+          _buildNotificationList(oldNotifications, "No old notifications"),
         ],
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: _showAddNotificationDialog,
+        child: const Icon(Icons.add),
       ),
     );
   }
-}
 
-
-class NotificationItem extends StatelessWidget {
-  final String notificationText;
-  final bool isStarred;
-  final VoidCallback onDelete;
-  final VoidCallback onToggleStar;
-
-  NotificationItem({
-    required this.notificationText,
-    required this.isStarred,
-    required this.onDelete,
-    required this.onToggleStar,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return ListTile(
-      title: Text(notificationText),
-      trailing: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          IconButton(
-            icon: Icon(
-              isStarred ? Icons.star : Icons.star_border,
-              color: isStarred ? Colors.yellow : Colors.grey,
-            ),
-            onPressed: onToggleStar,
+  Widget _buildNotificationList(
+      List<String> notifications, String emptyMessage) {
+    if (notifications.isEmpty) {
+      return Center(child: Text(emptyMessage));
+    }
+    return ListView.builder(
+      itemCount: notifications.length,
+      itemBuilder: (context, index) {
+        return ListTile(
+          title: Text(notifications[index]),
+          trailing: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              IconButton(
+                icon: const Icon(Icons.star),
+                onPressed: () {
+                  setState(() {
+                    starredNotifications.add(notifications[index]);
+                    notifications.removeAt(index);
+                  });
+                },
+              ),
+              IconButton(
+                icon: const Icon(Icons.delete),
+                onPressed: () {
+                  setState(() {
+                    oldNotifications.add(notifications[index]);
+                    notifications.removeAt(index);
+                  });
+                },
+              ),
+            ],
           ),
-          IconButton(
-            icon: Icon(Icons.delete),
-            onPressed: onDelete,
-          ),
-        ],
-      ),
+        );
+      },
     );
   }
 }
